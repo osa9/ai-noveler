@@ -1,5 +1,7 @@
 import { generateNovel } from '@/lib/chatgpt'
 
+export const runtime = 'edge'
+
 export async function POST(request: Request) {
   const content = await request.json()
   if (!content.description) {
