@@ -24,7 +24,10 @@ const Message: React.FC<{ message: Message }> = ({ message }) => {
 
   return (
     <div className="flex mb-4 items-center">
-      <div className="flex flex-col justify-center items-center">
+      <div
+        className="flex flex-col justify-center items-center"
+        style={{ width: 100 }}
+      >
         <img
           src={icon}
           alt={message.character}
@@ -33,7 +36,9 @@ const Message: React.FC<{ message: Message }> = ({ message }) => {
         />
         <p className="font-bold">{message.character}</p>
       </div>
-      <p>{message.content}</p>
+      <div className="flex-1">
+        <p>{message.content}</p>
+      </div>
     </div>
   )
 }
@@ -44,7 +49,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(false)
 
   const getResult = async () => {
-    if (!description) return
+    if (!description || loading) return
 
     setLoading(true)
     const res = await fetch(
@@ -57,6 +62,12 @@ export default function Home() {
         body: JSON.stringify({ description }),
       }
     )
+
+    if (!res.ok) {
+      setResult([{ content: 'エラーが発生しました' }])
+      setLoading(false)
+      return
+    }
     const json = await res.json()
     setResult(json.data.messages)
     setLoading(false)
