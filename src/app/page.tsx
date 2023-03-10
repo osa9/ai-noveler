@@ -79,8 +79,8 @@ export default function Home() {
       {!loading && !result && <p>結果はここに表示されます</p>}
       {!loading && result && (
         <p>
-          {result.map((r) => (
-            <Message message={r} />
+          {result.map((r, index) => (
+            <Message message={r} key={index} />
           ))}
         </p>
       )}
