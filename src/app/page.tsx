@@ -47,13 +47,16 @@ export default function Home() {
     if (!description) return
 
     setLoading(true)
-    const res = await fetch('/api/generator', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ description }),
-    })
+    const res = await fetch(
+      'https://04he3x5de1.execute-api.ap-northeast-1.amazonaws.com/default/ai-noveler',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+      }
+    )
     const json = await res.json()
     setResult(json.data.messages)
     setLoading(false)
