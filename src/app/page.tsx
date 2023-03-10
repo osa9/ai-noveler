@@ -1,91 +1,89 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+'use client'
 
-const inter = Inter({ subsets: ['latin'] })
+import React from 'react'
+import { Textarea, Button } from 'flowbite-react'
+import { Message } from '@/lib/chatgpt'
+
+const Message: React.FC<{ message: Message }> = ({ message }) => {
+  if (!message.character || !message.emotion) {
+    return <div className="mb-4">{message.content}</div>
+  }
+
+  const emotion = message.emotion
+
+  let icon = '/avatars/normal.png'
+  if (emotion === '驚き') {
+    icon = '/avatars/surprise.png'
+  } else if (emotion === '怒り') {
+    icon = '/avatars/angry.png'
+  } else if (emotion === '泣き') {
+    icon = '/avatars/crying.png'
+  } else if (emotion === '喜び') {
+    icon = '/avatars/happy.png'
+  }
+
+  return (
+    <div className="flex mb-4 items-center">
+      <div className="flex flex-col justify-center items-center">
+        <img
+          src={icon}
+          alt={message.character}
+          title={message.emotion}
+          style={{ width: 96, height: 'auto' }}
+        />
+        <p className="font-bold">{message.character}</p>
+      </div>
+      <p>{message.content}</p>
+    </div>
+  )
+}
 
 export default function Home() {
+  const [description, setDescription] = React.useState('')
+  const [result, setResult] = React.useState<Message[]>()
+  const [loading, setLoading] = React.useState(false)
+
+  const getResult = async () => {
+    if (!description) return
+
+    setLoading(true)
+    const res = await fetch('/api/generator', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description }),
+    })
+    const json = await res.json()
+    setResult(json.data.messages)
+    setLoading(false)
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
+    <main>
+      <h1 className="text-3xl font-bold">
+        <a href="/">SS Generator</a>
+      </h1>
+      <Textarea
+        id=""
+        placeholder="キャッチコピーやストーリーを入力(140字以内)"
+        onChange={(e) => {
+          setDescription(e.target.value)
+        }}
+      />
+      <Button type="submit" onClick={() => getResult()}>
+        生成!
+      </Button>
+      <hr />
+      {loading && <p>生成中...</p>}
+      {!loading && !result && <p>結果はここに表示されます</p>}
+      {!loading && result && (
         <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
+          {result.map((r) => (
+            <Message message={r} />
+          ))}
         </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      )}
     </main>
   )
 }
