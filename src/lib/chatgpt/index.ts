@@ -1,11 +1,3 @@
-import { Configuration, OpenAIApi } from 'openai'
-
-const config = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
-export const openai = new OpenAIApi(config)
-
 export interface Character {
   name: string
   gender: 'men' | 'women'
@@ -36,14 +28,23 @@ const SYSTEM_PROMPT = `あなたはプロの小説家です。
 `
 
 export const generateNovelText = async (description: string) => {
-  const response = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: description },
-    ],
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: description },
+      ],
+    }),
   })
-  return response.data?.choices[0]?.message?.content
+
+  const body = await response.json()
+  return body.choices[0]?.message?.content
 }
 
 export const parseNovel = (text: string) => {
